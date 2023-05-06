@@ -23,5 +23,5 @@
   "engines": {
     "node": "18"
   },
-  "browserslist": "> 5%, not dead"
+  "browserslist": "defaults"
 }
