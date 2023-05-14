@@ -23,5 +23,9 @@
   "engines": {
     "node": "18"
   },
-  "browserslist": "defaults"
+  "browserslist": "defaults",
+  "dependencies": {
+    "dayjs": "1.11.7",
+    "flatpickr": "^4.6.13"
+  }
 }
