@@ -1,13 +1,13 @@
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
-import PointView from '../view/point.js';
-import EditFormView from '../view/edit-form.js';
-import {RenderPosition, render} from '../render.js';
+import PointView from '../view/point-view.js';
+import EditFormView from '../view/edit-form-view.js';
+import {RenderPosition} from '../render.js';
+import {render, replace} from '../framework/render.js';
 
 export default class PointsPresenter {
   filtersComponent = new FiltersView();
   sortComponent = new SortView();
-  editFormComponent = new EditFormView();
 
   constructor({filtersContainer, eventsContainer, pointsModel}) {
     this.filtersContainer = filtersContainer;
@@ -22,7 +22,19 @@ export default class PointsPresenter {
     render(this.sortComponent, this.eventsContainer, RenderPosition.BEFOREBEGIN);
 
     for (let i = 0; i < this.points.length; i++) {
-      render(new PointView({point: this.points[i]}), this.eventsContainer);
+      render(new PointView({point: this.points[i]}, this.handleOpenFormBtn), this.eventsContainer);
     }
   }
+
+  handleOpenFormBtn = (pointView) => {
+    replace(new EditFormView({point: pointView.point}, this.handleSaveForm, this.handleCloseFormBtn), pointView);
+  };
+
+  handleCloseFormBtn = (editFormView) => {
+    replace(new PointView({point: editFormView.point}, this.handleOpenFormBtn), editFormView);
+  };
+
+  handleSaveForm = () => {
+
+  };
 }
