@@ -1,4 +1,5 @@
 import { offersByTypes, destinations } from './static-data.js';
+import { nanoid } from 'nanoid';
 
 function generatePoint() {
   const types = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
@@ -11,7 +12,7 @@ function generatePoint() {
   const offerIds = offersByTypes.find((offer) => offer.type === type).offers.map((offer) => offer.id);
 
   return {
-    id: '',
+    id: nanoid(),
     type,
     destination: getRandomArrayElement(destinations.map((dest) => dest.id)),
     dateFrom: getRandomArrayElement(startDates),

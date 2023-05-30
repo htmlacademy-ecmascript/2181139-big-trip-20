@@ -1,40 +1,85 @@
-import FiltersView from '../view/filters-view.js';
-import SortView from '../view/sort-view.js';
 import PointView from '../view/point-view.js';
-import EditFormView from '../view/edit-form-view.js';
-import {RenderPosition} from '../render.js';
-import {render, replace} from '../framework/render.js';
+import EditPointView from '../view/edit-point-view.js';
+import { render, replace, remove } from '../framework/render';
+
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
 
 export default class PointsPresenter {
-  filtersComponent = new FiltersView();
-  sortComponent = new SortView();
+  #container = null;
+  #point = null;
+  #pointView = null;
+  #editPointView = null;
+  #handleDataChange = null;
 
-  constructor({filtersContainer, eventsContainer, pointsModel}) {
-    this.filtersContainer = filtersContainer;
-    this.eventsContainer = eventsContainer;
-    this.pointsModel = pointsModel;
+  #mode = Mode.DEFAULT;
+
+  constructor({container, onDataChange}) {
+    this.#container = container;
+    this.#handleDataChange = onDataChange;
   }
 
-  init() {
-    this.points = [...this.pointsModel.getPoints()];
+  init(point) {
+    this.#point = point;
 
-    render(this.filtersComponent, this.filtersContainer);
-    render(this.sortComponent, this.eventsContainer, RenderPosition.BEFOREBEGIN);
+    const prevPointView = this.#pointView;
+    const prevEditPointView = this.#editPointView;
 
-    for (let i = 0; i < this.points.length; i++) {
-      render(new PointView({point: this.points[i]}, this.handleOpenFormBtn), this.eventsContainer);
+    this.#pointView = new PointView({ point: this.#point, onEditClick: this.#handleEditClick, onFavoriteClick: this.#handleFavoriteClick });
+    this.#editPointView = new EditPointView({ point: this.#point, onFormSubmit: this.#handleFormSubmit, onCloseClick: this.#handleCloseClick});
+
+    if (prevPointView === null || prevEditPointView === null) {
+      render(this.#pointView, this.#container);
+      return;
     }
+
+    if (this.#mode === Mode.DEFAULT) {
+      replace(this.#pointView, prevPointView);
+    }
+
+    if (this.#mode === Mode.EDITING) {
+      replace(this.#editPointView, prevEditPointView);
+    }
+
+    remove(prevPointView);
+    remove(prevEditPointView);
   }
 
-  handleOpenFormBtn = (pointView) => {
-    replace(new EditFormView({point: pointView.point}, this.handleSaveForm, this.handleCloseFormBtn), pointView);
+  #switchToPointView() {
+    replace(this.#pointView, this.#editPointView);
+    document.removeEventListener('keyup', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
+  }
+
+  #switchToEditPointView() {
+    replace(this.#editPointView, this.#pointView);
+    document.addEventListener('keyup', this.#escKeyDownHandler);
+    this.#mode = Mode.EDITING;
+  }
+
+  #handleEditClick = () => {
+    this.#switchToEditPointView();
   };
 
-  handleCloseFormBtn = (editFormView) => {
-    replace(new PointView({point: editFormView.point}, this.handleOpenFormBtn), editFormView);
+  #handleCloseClick = () => {
+    this.#switchToPointView();
   };
 
-  handleSaveForm = () => {
+  #handleFavoriteClick = () => {
+    this.#handleDataChange({ ...this.#point, isFavorite: !this.#point.isFavorite });
+  };
 
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(point);
+    this.#switchToPointView();
+  };
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#switchToPointView();
+    }
   };
 }

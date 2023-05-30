@@ -3,7 +3,7 @@ import { destinations } from '../data/static-data.js';
 import dayjs from 'dayjs';
 import { offersByTypes } from '../data/static-data.js';
 
-function editFormTemplate(point) {
+function editPointTemplate(point) {
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -114,11 +114,16 @@ function editFormTemplate(point) {
 </li>`;
 }
 
-export default class EditFormView extends AbstractView {
+export default class EditPointView extends AbstractView {
+  #point = null;
+  #handleFormSubmit = null;
+  #handleCloseClick = null;
 
-  constructor({point}, handleSave, handleCloseBtn) {
+  constructor({point, onFormSubmit, onCloseClick}) {
     super();
-    this.point = point;
+    this.#point = point;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleCloseClick = onCloseClick;
 
     this.element.querySelector('.event__type-icon').src = `img/icons/${point.type}.png`;
     this.element.querySelector('.event__type-output').textContent = point.type;
@@ -146,32 +151,25 @@ export default class EditFormView extends AbstractView {
       offersContainer.appendChild(offerContainer);
     }
 
-
     const form = this.element.querySelector('form');
-    form.addEventListener('change', () => {
-      const formData = new FormData(form);
-      const eventType = formData.get('event-type');
-      this.element.querySelector('.event__type-icon').src = `img/icons/${eventType}.png`;
-      this.element.querySelector('.event__type-output').textContent = eventType;
-    });
+    // form.addEventListener('change', () => {
+    //   const formData = new FormData(form);
+    //   const eventType = formData.get('event-type');
+    //   this.element.querySelector('.event__type-icon').src = `img/icons/${eventType}.png`;
+    //   this.element.querySelector('.event__type-output').textContent = eventType;
+    // });
 
     form.addEventListener('submit', (evt) => {
       evt.preventDefault();
-      handleSave(new FormData(form));
-    });
-
-    form.addEventListener('keyup', (evt) => {
-      if (evt.key === 'Escape') {
-        handleCloseBtn(this);
-      }
+      this.#handleFormSubmit(this.#point);
     });
 
     this.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      handleCloseBtn(this);
+      this.#handleCloseClick();
     });
   }
 
   get template() {
-    return editFormTemplate(this.point);
+    return editPointTemplate(this.#point);
   }
 }
