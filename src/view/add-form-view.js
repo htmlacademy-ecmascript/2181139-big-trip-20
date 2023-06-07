@@ -165,8 +165,8 @@ function addFormTemplate() {
 </li>`;
 }
 
-export default class AddFormView extends AbstractView{
-  constructor(){
+export default class AddFormView extends AbstractView {
+  constructor() {
     super();
   }
 
