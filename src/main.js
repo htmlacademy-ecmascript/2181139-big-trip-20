@@ -7,9 +7,9 @@ const filtersPresenter = new FiltersPresenter({
 });
 filtersPresenter.init();
 
-const mainPresenter = new BoardPresenter({
+const boardPresenter = new BoardPresenter({
   eventsContainer: document.querySelector('.trip-events__list'),
   pointsModel: new PointsModel()
 });
 
-mainPresenter.init();
+boardPresenter.init();

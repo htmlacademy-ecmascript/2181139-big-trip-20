@@ -42,7 +42,7 @@ export default class BoardPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  handleFavoriteBtn = () => {};
+  #handleFavoriteBtn = () => {};
 
   #handlePointChange = (updatedPoint) => {
     this.#points = updateItem(this.#points, updatedPoint);
