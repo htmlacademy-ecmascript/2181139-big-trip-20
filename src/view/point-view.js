@@ -8,12 +8,14 @@ dayjs.extend(dur);
 
 function calcDuration(start, end) {
   const duration = dayjs.duration(end.diff(start));
-  if (duration.as('minutes') < 60) {
+  if (duration.asMinutes() < 60) {
     return `${duration.format('m')}M`;
-  } else if (duration.as('days') < 1) {
+  } else if (duration.asDays < 1) {
     return `${duration.format('H')}H ${duration.format('m')}M`;
-  } else {
+  } else if (duration.asMonths() < 1) {
     return `${duration.format('D')}D ${duration.format('H')}H ${duration.format('m')}M`;
+  } else {
+    return `${duration.format('Y')}Y ${duration.format('M')}MO ${duration.format('D')}D ${duration.format('H')}H ${duration.format('m')}M`;
   }
 }
 
