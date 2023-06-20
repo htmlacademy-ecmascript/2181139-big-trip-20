@@ -1,12 +1,11 @@
 
-import { destinations } from '../data/static-data.js';
 import dayjs from 'dayjs';
-import { offersByTypes } from '../data/static-data.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { destinations, offersByTypes } from '../models/points-model.js';
 dayjs.extend(customParseFormat);
 
 const dateFormat = 'DD/MM/YY HH:mm';
@@ -104,7 +103,7 @@ function editPointTemplate(state) {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="basePrice" value="${he.encode(state.basePrice)}">
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="basePrice" value="${he.encode(`${state.basePrice}`)}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit" ${!destination || state.basePrice === '' || dateFrom > dateTo ? 'disabled' : ''}>Save</button>
@@ -164,7 +163,6 @@ export default class EditPointView extends AbstractStatefulView {
       this._state = { ...point };
     } else {
       this._state = {
-        id: null,
         type: 'taxi',
         destination: null,
         dateFrom: dayjs().toISOString(),

@@ -1,8 +1,7 @@
-import { destinations } from '../data/static-data.js';
-import { offersByTypes } from '../data/static-data.js';
 import dayjs from 'dayjs';
 import dur from 'dayjs/plugin/duration';
 import AbstractView from '../framework/view/abstract-view.js';
+import { destinations, offersByTypes } from '../models/points-model.js';
 
 dayjs.extend(dur);
 

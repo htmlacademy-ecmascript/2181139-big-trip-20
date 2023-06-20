@@ -1,9 +1,7 @@
 import {remove, render} from '../framework/render.js';
 import {UserAction, UpdateType} from '../utils/const.js';
-import { nanoid } from 'nanoid';
 import EditPointView from '../view/edit-point-view.js';
 import { RenderPosition } from '../framework/render.js';
-
 
 export default class NewPointPresenter {
   #container = null;
@@ -22,7 +20,6 @@ export default class NewPointPresenter {
     if (this.#newPointView !== null) {
       return;
     }
-
     this.#newPointView = new EditPointView({
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick
@@ -50,7 +47,7 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-      {...point, id: nanoid()},
+      {...point},
     );
     this.destroy();
   };

@@ -10,13 +10,15 @@ export default class PointsPresenter {
   #editPointView = null;
   #handleDataChange = null;
   #handleModeChange = null;
+  #pointApiService = null;
 
   #mode = Mode.DEFAULT;
 
-  constructor({container, onDataChange, onModeChange}) {
+  constructor({container, onDataChange, onModeChange, pointApiService}) {
     this.#container = container;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
+    this.#pointApiService = pointApiService;
   }
 
   init(point) {

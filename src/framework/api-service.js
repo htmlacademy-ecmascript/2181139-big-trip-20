@@ -28,6 +28,10 @@ export default class ApiService {
   }) {
     headers.append('Authorization', this._authorization);
 
+    if (body !== null && typeof body === 'object') {
+      body = JSON.stringify(body);
+    }
+
     const response = await fetch(
       `${this._endPoint}/${url}`,
       {method, body, headers},
