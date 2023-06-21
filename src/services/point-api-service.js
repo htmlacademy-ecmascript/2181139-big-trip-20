@@ -8,12 +8,22 @@ export default class PointApiService extends ApiService {
   }
 
   updatePoint(point) {
-    return this._load({method: 'PUT', url: `big-trip/points/${point.id}`, body: this.#transformPointForServer(point)})
+    return this._load({
+      method: 'PUT',
+      url: `big-trip/points/${point.id}`,
+      body: this.#transformPointForServer(point),
+      headers: new Headers({'Content-Type': 'applications/json'})
+    })
       .then(ApiService.parseResponse);
   }
 
   addPoint(point) {
-    return this._load({method: 'POST', url: 'big-trip/points', body: this.#transformPointForServer(point)})
+    return this._load({
+      method: 'POST',
+      url: 'big-trip/points',
+      body: this.#transformPointForServer(point),
+      headers: new Headers({'Content-Type': 'applications/json'})
+    })
       .then(ApiService.parseResponse);
   }
 
