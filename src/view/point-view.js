@@ -5,9 +5,11 @@ import { destinations, offersByTypes } from '../models/points-model.js';
 
 dayjs.extend(dur);
 
+const MINUTES_IN_HOUR = 60;
+
 function calcDuration(start, end) {
   const duration = dayjs.duration(end.diff(start));
-  if (duration.asMinutes() < 60) {
+  if (duration.asHours() < MINUTES_IN_HOUR) {
     return `${duration.format('m')}M`;
   } else if (duration.asDays < 1) {
     return `${duration.format('H')}H ${duration.format('m')}M`;
@@ -85,6 +87,10 @@ export default class PointView extends AbstractView {
     this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
+  get template() {
+    return createPointTemplate(this.#point);
+  }
+
   #editClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleEditClick();
@@ -94,8 +100,4 @@ export default class PointView extends AbstractView {
     evt.preventDefault();
     this.#handleFavoriteClick();
   };
-
-  get template() {
-    return createPointTemplate(this.#point);
-  }
 }

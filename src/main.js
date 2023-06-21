@@ -6,9 +6,10 @@ import { render } from './framework/render.js';
 import NewPointButtonView from './view/new-point-button-view.js';
 import PointApiService from './services/point-api-service.js';
 
-const endPoint = 'https://20.ecmascript.pages.academy';
-const authorization = 'Basic eo0w590ik29999a';
-const pointApiService = new PointApiService(endPoint, authorization);
+const ENDPOINT = 'https://20.ecmascript.pages.academy';
+const AUTHORIZATION = 'Basic eo0w590ik29999a';
+
+const pointApiService = new PointApiService(ENDPOINT, AUTHORIZATION);
 
 const filtersModel = new FiltersModel();
 const pointsModel = new PointsModel(pointApiService);

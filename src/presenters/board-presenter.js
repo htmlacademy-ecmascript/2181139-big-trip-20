@@ -4,10 +4,9 @@ import NewPointPresenter from './new-point-presenter.js';
 import SortView from '../view/sort-view.js';
 import {FilterType, Mode, SortType, UpdateType} from '../utils/const.js';
 import { filter } from '../utils/filter.js';
-import NoPointsView from '../view/no-points.js';
+import NoPointsView from '../view/no-points-view.js';
 import { UserAction } from '../utils/const.js';
 import LoadingView from '../view/loading-view.js';
-import ErrorView from '../view/error-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 const TimeLimit = {
@@ -33,8 +32,6 @@ export default class BoardPresenter {
   #sortView = null;
   #noPointsView = null;
   #loadingView = new LoadingView();
-  #errorView = new ErrorView();
-  #isLoading = true;
 
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -59,18 +56,6 @@ export default class BoardPresenter {
     this.#pointsModel.addObserver(this.#handlePointsModelEvent);
     this.#filtersModel.addObserver(this.#handleFiltersModelEvent);
     this.#renderLoading();
-  }
-
-  createPoint() {
-    if (this.#pointIdInEditMode !== null) {
-      this.#pointPresenters.get(this.#pointIdInEditMode).switchToPointView();
-      this.#pointIdInEditMode = null;
-    }
-    this.#pointCreationInProgress = true;
-
-    this.#sortType = SortType.DAY;
-    this.#filtersModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#newPointPresenter.init();
   }
 
   get points() {
@@ -102,6 +87,18 @@ export default class BoardPresenter {
     }
 
     return filteredPoints;
+  }
+
+  createPoint() {
+    if (this.#pointIdInEditMode !== null) {
+      this.#pointPresenters.get(this.#pointIdInEditMode).switchToPointView();
+      this.#pointIdInEditMode = null;
+    }
+    this.#pointCreationInProgress = true;
+
+    this.#sortType = SortType.DAY;
+    this.#filtersModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init();
   }
 
   #renderBoard() {
@@ -193,7 +190,6 @@ export default class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.INIT:
-        this.#isLoading = false;
         remove(this.#loadingView);
         this.#renderBoard();
         break;
