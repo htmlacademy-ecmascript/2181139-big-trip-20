@@ -6,6 +6,14 @@ import {FilterType, Mode, SortType, UpdateType} from '../utils/const.js';
 import { filter } from '../utils/filter.js';
 import NoPointsView from '../view/no-points.js';
 import { UserAction } from '../utils/const.js';
+import LoadingView from '../view/loading-view.js';
+import ErrorView from '../view/error-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class BoardPresenter {
   #eventsContainer = null;
@@ -24,6 +32,14 @@ export default class BoardPresenter {
 
   #sortView = null;
   #noPointsView = null;
+  #loadingView = new LoadingView();
+  #errorView = new ErrorView();
+  #isLoading = true;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ eventsContainer, filtersModel, pointsModel, onNewPointDestroy }) {
     this.#eventsContainer = eventsContainer;
@@ -31,6 +47,7 @@ export default class BoardPresenter {
     this.#filtersModel = filtersModel;
 
     this.#newPointPresenter = new NewPointPresenter({
+
       container: this.#eventsContainer,
       onDataChange: this.#handleViewAction,
       onDestroy: () => {
@@ -41,6 +58,7 @@ export default class BoardPresenter {
 
     this.#pointsModel.addObserver(this.#handlePointsModelEvent);
     this.#filtersModel.addObserver(this.#handleFiltersModelEvent);
+    this.#renderLoading();
   }
 
   createPoint() {
@@ -86,10 +104,6 @@ export default class BoardPresenter {
     return filteredPoints;
   }
 
-  init() {
-    this.#renderBoard();
-  }
-
   #renderBoard() {
     this.#renderSort();
     this.#renderPoints();
@@ -131,18 +145,31 @@ export default class BoardPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  #handleViewAction = (userAction, updateType, updatedPoint) => {
-    switch (userAction) {
-      case UserAction.UPDATE_POINT:
-        this.#pointsModel.update(updateType, updatedPoint);
-        break;
-      case UserAction.ADD_POINT:
-        this.#pointsModel.add(updateType, updatedPoint);
-        break;
-      case UserAction.DELETE_POINT:
-        this.#pointsModel.remove(updateType, updatedPoint);
-        break;
+  #renderLoading() {
+    render(this.#loadingView, this.#eventsContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #handleViewAction = async (userAction, updateType, updatedPoint) => {
+    this.#uiBlocker.block();
+
+    try {
+      switch (userAction) {
+        case UserAction.UPDATE_POINT:
+          await this.#pointsModel.update(updateType, updatedPoint);
+          break;
+        case UserAction.ADD_POINT:
+          await this.#pointsModel.add(updateType, updatedPoint);
+          break;
+        case UserAction.DELETE_POINT:
+          await this.#pointsModel.remove(updateType, updatedPoint);
+          break;
+      }
+    } catch (err) {
+      this.#clearBoard();
+      render(this.#errorView, this.#eventsContainer, RenderPosition.AFTERBEGIN);
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handlePointsModelEvent = (updateType, point) => {
@@ -158,10 +185,15 @@ export default class BoardPresenter {
         this.#clearBoard({resetSorting: true, resetFilter: true});
         this.#renderBoard();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingView);
+        this.#renderBoard();
+        break;
     }
   };
 
-  #handleFiltersModelEvent = (updateType, filter) => {
+  #handleFiltersModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
       case UpdateType.MINOR:
