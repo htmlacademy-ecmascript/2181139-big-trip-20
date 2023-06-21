@@ -10,15 +10,13 @@ export default class PointsPresenter {
   #editPointView = null;
   #handleDataChange = null;
   #handleModeChange = null;
-  #pointApiService = null;
 
   #mode = Mode.DEFAULT;
 
-  constructor({container, onDataChange, onModeChange, pointApiService}) {
+  constructor({container, onDataChange, onModeChange}) {
     this.#container = container;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
-    this.#pointApiService = pointApiService;
   }
 
   init(point) {
@@ -73,20 +71,20 @@ export default class PointsPresenter {
     );
   };
 
-  #handleFormSubmit = (point) => {
-    this.#handleDataChange(
+  #handleFormSubmit = async (point) => {
+    await this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       point);
     this.switchToPointView();
   };
 
-  #handleDeleteClick = () => {
-    this.switchToPointView();
-    this.#handleDataChange(
+  #handleDeleteClick = async () => {
+    await this.#handleDataChange(
       UserAction.DELETE_POINT,
       UpdateType.MINOR,
       this.#point);
+    this.switchToPointView();
   };
 
   #handleCloseClick = () => {
@@ -103,6 +101,33 @@ export default class PointsPresenter {
   destroy() {
     remove(this.#pointView);
     remove(this.#editPointView);
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.updateElement({
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.updateElement({
+        isDeleting: true,
+      });
+    }
+  }
+
+  handleError() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.shake(() => {
+        this.#editPointView.updateElement({
+          isSaving: false,
+          isDeleting: false,
+        });
+      });
+    }
   }
 
 }

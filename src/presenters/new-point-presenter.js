@@ -43,8 +43,8 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #handleFormSubmit = (point) => {
-    this.#handleDataChange(
+  #handleFormSubmit = async (point) => {
+    await this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
       {...point},
@@ -62,4 +62,19 @@ export default class NewPointPresenter {
       this.destroy();
     }
   };
+
+  setSaving() {
+    this.#newPointView.updateElement({
+      isSaving: true,
+    });
+  }
+
+  handleError() {
+    this.#newPointView.shake(() => {
+      this.#newPointView.updateElement({
+        isSaving: false,
+        isDeleting: false,
+      });
+    });
+  }
 }

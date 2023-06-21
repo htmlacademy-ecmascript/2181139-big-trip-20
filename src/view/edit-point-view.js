@@ -18,6 +18,8 @@ function editPointTemplate(state) {
   const dateFrom = dayjs(state.dateFrom);
   const dateTo = dayjs(state.dateTo);
 
+  const deleteBtnText = state.isDeleting ? 'Deleting...' : 'Delete';
+
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -106,8 +108,8 @@ function editPointTemplate(state) {
         <input class="event__input  event__input--price" id="event-price-1" type="number" name="basePrice" value="${he.encode(`${state.basePrice}`)}">
       </div>
 
-      <button class="event__save-btn  btn  btn--blue" type="submit" ${!destination || state.basePrice === '' || dateFrom > dateTo ? 'disabled' : ''}>Save</button>
-      <button class="event__reset-btn" type="reset">${state.id ? 'Delete' : 'Cancel'}</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit" ${!destination || state.basePrice === '' || dateFrom > dateTo || state.isSaving || state.isDeleting ? 'disabled' : ''}>${state.isSaving ? 'Saving...' : 'Save'}</button>
+      <button class="event__reset-btn" type="reset">${state.id ? deleteBtnText : 'Cancel'}</button>
       ${state.id ? `<button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Close event</span>
       </button>` : ''}
@@ -173,6 +175,9 @@ export default class EditPointView extends AbstractStatefulView {
       };
     }
 
+    this._state.isSaving = false;
+    this._state.isDeleting = false;
+
     this.#handleFormSubmit = onFormSubmit;
     this.#handleCloseClick = onCloseClick;
     this.#handleDeleteClick = onDeleteClick;
@@ -208,6 +213,8 @@ export default class EditPointView extends AbstractStatefulView {
 
     form.addEventListener('submit', (evt) => {
       evt.preventDefault();
+      delete this._state.isDeleting;
+      delete this._state.isSaving;
       this.#handleFormSubmit(this._state);
     });
 
