@@ -155,21 +155,28 @@ export default class BoardPresenter {
     try {
       switch (userAction) {
         case UserAction.UPDATE_POINT:
+          this.#pointPresenters.get(updatedPoint.id).setSaving();
           await this.#pointsModel.update(updateType, updatedPoint);
           break;
         case UserAction.ADD_POINT:
+          this.#newPointPresenter.setSaving();
           await this.#pointsModel.add(updateType, updatedPoint);
           break;
         case UserAction.DELETE_POINT:
+          this.#pointPresenters.get(updatedPoint.id).setDeleting();
           await this.#pointsModel.remove(updateType, updatedPoint);
           break;
       }
     } catch (err) {
-      this.#clearBoard();
-      render(this.#errorView, this.#eventsContainer, RenderPosition.AFTERBEGIN);
+      if (userAction === UserAction.ADD_POINT) {
+        this.#newPointPresenter.handleError();
+      } else {
+        this.#pointPresenters.get(updatedPoint.id).handleError();
+      }
+      throw err;
+    } finally {
+      this.#uiBlocker.unblock();
     }
-
-    this.#uiBlocker.unblock();
   };
 
   #handlePointsModelEvent = (updateType, point) => {
