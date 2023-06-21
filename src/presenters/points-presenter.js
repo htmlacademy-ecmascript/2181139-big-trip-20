@@ -59,6 +59,38 @@ export default class PointsPresenter {
     this.#handleModeChange(this.#point.id, Mode.EDITING);
   }
 
+  destroy() {
+    remove(this.#pointView);
+    remove(this.#editPointView);
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.updateElement({
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.updateElement({
+        isDeleting: true,
+      });
+    }
+  }
+
+  handleError() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointView.shake(() => {
+        this.#editPointView.updateElement({
+          isSaving: false,
+          isDeleting: false,
+        });
+      });
+    }
+  }
+
   #handleEditClick = () => {
     this.switchToEditPointView();
   };
@@ -97,37 +129,4 @@ export default class PointsPresenter {
       this.switchToPointView();
     }
   };
-
-  destroy() {
-    remove(this.#pointView);
-    remove(this.#editPointView);
-  }
-
-  setSaving() {
-    if (this.#mode === Mode.EDITING) {
-      this.#editPointView.updateElement({
-        isSaving: true,
-      });
-    }
-  }
-
-  setDeleting() {
-    if (this.#mode === Mode.EDITING) {
-      this.#editPointView.updateElement({
-        isDeleting: true,
-      });
-    }
-  }
-
-  handleError() {
-    if (this.#mode === Mode.EDITING) {
-      this.#editPointView.shake(() => {
-        this.#editPointView.updateElement({
-          isSaving: false,
-          isDeleting: false,
-        });
-      });
-    }
-  }
-
 }

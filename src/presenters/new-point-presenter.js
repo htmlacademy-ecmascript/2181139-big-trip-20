@@ -1,7 +1,6 @@
-import {remove, render} from '../framework/render.js';
+import {remove, render, RenderPosition} from '../framework/render.js';
 import {UserAction, UpdateType} from '../utils/const.js';
 import EditPointView from '../view/edit-point-view.js';
-import { RenderPosition } from '../framework/render.js';
 
 export default class NewPointPresenter {
   #container = null;
@@ -43,26 +42,6 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #handleFormSubmit = async (point) => {
-    await this.#handleDataChange(
-      UserAction.ADD_POINT,
-      UpdateType.MINOR,
-      {...point},
-    );
-    this.destroy();
-  };
-
-  #handleDeleteClick = () => {
-    this.destroy();
-  };
-
-  #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this.destroy();
-    }
-  };
-
   setSaving() {
     this.#newPointView.updateElement({
       isSaving: true,
@@ -77,4 +56,24 @@ export default class NewPointPresenter {
       });
     });
   }
+
+  #handleFormSubmit = async (point) => {
+    await this.#handleDataChange(
+      UserAction.ADD_POINT,
+      UpdateType.MINOR,
+      {...point},
+    );
+    this.destroy();
+  };
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.destroy();
+    }
+  };
+
+  #handleDeleteClick = () => {
+    this.destroy();
+  };
 }

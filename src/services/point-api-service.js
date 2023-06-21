@@ -7,6 +7,16 @@ export default class PointApiService extends ApiService {
       .then((points) => points.map(this.transformPointForClient));
   }
 
+  get destinations() {
+    return this._load({url: 'big-trip/destinations'})
+      .then(ApiService.parseResponse);
+  }
+
+  get offers() {
+    return this._load({url: 'big-trip/offers'})
+      .then(ApiService.parseResponse);
+  }
+
   updatePoint(point) {
     return this._load({method: 'PUT', url: `big-trip/points/${point.id}`, body: this.#transformPointForServer(point), headers: new Headers({ 'Content-Type': 'application/json'})})
       .then(ApiService.parseResponse);
@@ -19,16 +29,6 @@ export default class PointApiService extends ApiService {
 
   deletePoint(point){
     return this._load({method: 'DELETE', url: `big-trip/points/${point.id}`});
-  }
-
-  get destinations() {
-    return this._load({url: 'big-trip/destinations'})
-      .then(ApiService.parseResponse);
-  }
-
-  get offers() {
-    return this._load({url: 'big-trip/offers'})
-      .then(ApiService.parseResponse);
   }
 
   #transformPointForServer(point) {
@@ -63,7 +63,5 @@ export default class PointApiService extends ApiService {
     delete adaptedPoint.is_favorite;
 
     return adaptedPoint;
-
   }
-
 }

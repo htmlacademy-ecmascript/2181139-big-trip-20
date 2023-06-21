@@ -8,7 +8,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { destinations, offersByTypes } from '../models/points-model.js';
 dayjs.extend(customParseFormat);
 
-const dateFormat = 'DD/MM/YY HH:mm';
+const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
 function editPointTemplate(state) {
   const destination = destinations.find((dest) => dest.id === state.destination);
@@ -94,10 +94,10 @@ function editPointTemplate(state) {
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="dateFrom" value="${dateFrom.format(dateFormat)}">
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="dateFrom" value="${dateFrom.format(DATE_FORMAT)}">
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="dateTo" value="${dateTo.format(dateFormat)}">
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="dateTo" value="${dateTo.format(DATE_FORMAT)}">
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -115,13 +115,14 @@ function editPointTemplate(state) {
       </button>` : ''}
     </header>
     <section class="event__details">
-      <section class="event__section  event__section--offers">
+    ${offers.length > 0 ?
+    `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
         ${offers.map((offer) => createOffer(offer, state)).join('')}
         </div>
-      </section>
+      </section>` : ''}
 
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -185,6 +186,46 @@ export default class EditPointView extends AbstractStatefulView {
     this._restoreHandlers();
   }
 
+  get template() {
+    return editPointTemplate(this._state);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#dateFromDatepicker) {
+      this.#dateFromDatepicker.destroy();
+      this.#dateFromDatepicker = null;
+    }
+    if (this.#dateToDatepicker) {
+      this.#dateToDatepicker.destroy();
+      this.#dateToDatepicker = null;
+    }
+  }
+
+  #setDatepickers() {
+    this.#dateFromDatepicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+        maxDate: this._state.dateTo
+      },
+    );
+    this.#dateToDatepicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+        minDate: this._state.dateFrom
+      },
+    );
+  }
+
   _restoreHandlers() {
     const form = this.element.querySelector('form');
     form.addEventListener('change', (evt) => {
@@ -204,8 +245,8 @@ export default class EditPointView extends AbstractStatefulView {
         ...this._state,
         type,
         destination: destination?.id,
-        dateFrom: dayjs(formData.get('dateFrom'), dateFormat).toISOString(),
-        dateTo: dayjs(formData.get('dateTo'), dateFormat).toISOString(),
+        dateFrom: dayjs(formData.get('dateFrom'), DATE_FORMAT).toISOString(),
+        dateTo: dayjs(formData.get('dateTo'), DATE_FORMAT).toISOString(),
         offers: offers.filter((offer) => formData.get(offer.id) !== null).map((offer) => offer.id),
         basePrice: Number(basePrice),
       });
@@ -232,23 +273,6 @@ export default class EditPointView extends AbstractStatefulView {
     this.#setDatepickers();
   }
 
-  get template() {
-    return editPointTemplate(this._state);
-  }
-
-  removeElement() {
-    super.removeElement();
-
-    if (this.#dateFromDatepicker) {
-      this.#dateFromDatepicker.destroy();
-      this.#dateFromDatepicker = null;
-    }
-    if (this.#dateToDatepicker) {
-      this.#dateToDatepicker.destroy();
-      this.#dateToDatepicker = null;
-    }
-  }
-
   #dateFromChangeHandler = ([dateFrom]) => {
     this.updateElement({
       dateFrom,
@@ -260,25 +284,4 @@ export default class EditPointView extends AbstractStatefulView {
       dateTo,
     });
   };
-
-  #setDatepickers() {
-    this.#dateFromDatepicker = flatpickr(
-      this.element.querySelector('#event-start-time-1'),
-      {
-        enableTime: true,
-        dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.dateFrom,
-        onChange: this.#dateFromChangeHandler,
-      },
-    );
-    this.#dateToDatepicker = flatpickr(
-      this.element.querySelector('#event-end-time-1'),
-      {
-        enableTime: true,
-        dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.dateTo,
-        onChange: this.#dateToChangeHandler,
-      },
-    );
-  }
 }

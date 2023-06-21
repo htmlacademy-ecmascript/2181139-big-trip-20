@@ -8,7 +8,7 @@ const NoPointsTextType = {
   [FilterType.PAST]: 'There are no past events now',
 };
 
-function createNoPointsTemplate(filterType) {
+function createNoPointsViewTemplate(filterType) {
   const noPointsTextValue = NoPointsTextType[filterType];
   return (
     `<p class="trip-events__msg">
@@ -27,7 +27,6 @@ export default class NoPointsView extends AbstractView {
   }
 
   get template() {
-    // return createNoPointsTemplate();
-    return createNoPointsTemplate(this.#filterType);
+    return createNoPointsViewTemplate(this.#filterType);
   }
 }
