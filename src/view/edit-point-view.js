@@ -207,7 +207,7 @@ export default class EditPointView extends AbstractStatefulView {
         dateFrom: dayjs(formData.get('dateFrom'), dateFormat).toISOString(),
         dateTo: dayjs(formData.get('dateTo'), dateFormat).toISOString(),
         offers: offers.filter((offer) => formData.get(offer.id) !== null).map((offer) => offer.id),
-        basePrice: basePrice
+        basePrice: Number(basePrice),
       });
     });
 
