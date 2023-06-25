@@ -5,7 +5,9 @@ import flatpickr from 'flatpickr';
 import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 import { destinations, offersByTypes } from '../models/points-model.js';
+
 dayjs.extend(customParseFormat);
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
