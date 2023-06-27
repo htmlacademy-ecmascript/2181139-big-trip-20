@@ -29,6 +29,10 @@ export default class FiltersPresenter {
   }
 
   init() {
+    if (this.#pointsModel.points.length === 0) {
+      return;
+    }
+
     const filters = this.filters;
     const prevFiltersView = this.#filtersView;
     this.#filtersView = new FiltersView({

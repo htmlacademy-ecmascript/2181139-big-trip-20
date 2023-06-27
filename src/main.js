@@ -20,6 +20,9 @@ const newPointButtonView = new NewPointButtonView({
 
 pointsModel.init()
   .finally(() => {
+    if (pointsModel.points.length === 0) {
+      newPointButtonView.element.disabled = true;
+    }
     render(newPointButtonView, document.querySelector('.trip-main'));
   });
 

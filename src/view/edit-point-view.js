@@ -2,7 +2,6 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
-import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -107,7 +106,7 @@ function editPointTemplate(state) {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="basePrice" value="${he.encode(`${state.basePrice}`)}">
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="basePrice" value="${state.basePrice}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit" ${!destination || state.basePrice === '' || dateFrom > dateTo || state.isSaving || state.isDeleting ? 'disabled' : ''}>${state.isSaving ? 'Saving...' : 'Save'}</button>
@@ -125,17 +124,17 @@ function editPointTemplate(state) {
         ${offers.map((offer) => createOffer(offer, state)).join('')}
         </div>
       </section>` : ''}
-
-      <section class="event__section  event__section--destination">
+    ${destination ?
+    `<section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
         <p class="event__destination-description">${destination ? destination.description : ''}</p>
 
-        ${state.id ? '' : `<div class="event__photos-container">
+        <div class="event__photos-container">
           <div class="event__photos-tape">
             ${destination ? destination.pictures.map((pic) => `<img class="event__photo" src="${pic.src}" alt="Event photo" title="${pic.description}">`).join('') : ''}
           </div>
-        </div>`}
-      </section>
+        </div>
+      </section>` : ''}
     </section>
   </form>
 </li>`;
@@ -235,11 +234,22 @@ export default class EditPointView extends AbstractStatefulView {
         evt.preventDefault();
         return;
       }
+
       const formData = new FormData(form);
+      const basePrice = formData.get('basePrice');
+
+      if (evt.target.id === 'event-start-time-1' || evt.target.id === 'event-end-time-1' || evt.target.id === 'event-price-1') {
+        evt.preventDefault();
+        this._setState({dateFrom: dayjs(formData.get('dateFrom'), DATE_FORMAT).toISOString(),
+          dateTo: dayjs(formData.get('dateTo'), DATE_FORMAT).toISOString(),
+          basePrice
+        });
+        return;
+      }
+
       const destinationName = formData.get('destinationName');
 
       const type = formData.get('type');
-      const basePrice = formData.get('basePrice');
       const offers = offersByTypes.find((offer) => offer.type === type).offers;
       const destination = destinations.find((dest) => dest.name === destinationName);
 
@@ -247,10 +257,7 @@ export default class EditPointView extends AbstractStatefulView {
         ...this._state,
         type,
         destination: destination?.id,
-        dateFrom: dayjs(formData.get('dateFrom'), DATE_FORMAT).toISOString(),
-        dateTo: dayjs(formData.get('dateTo'), DATE_FORMAT).toISOString(),
         offers: offers.filter((offer) => formData.get(offer.id) !== null).map((offer) => offer.id),
-        basePrice: Number(basePrice),
       });
     });
 
@@ -258,6 +265,7 @@ export default class EditPointView extends AbstractStatefulView {
       evt.preventDefault();
       delete this._state.isDeleting;
       delete this._state.isSaving;
+
       this.#handleFormSubmit(this._state);
     });
 
@@ -265,6 +273,13 @@ export default class EditPointView extends AbstractStatefulView {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
         this.updateElement({ ...this.#originalPoint });
         this.#handleCloseClick();
+      });
+      this.element.addEventListener('keyup', (evt) => {
+        if(evt.key === 'Escape') {
+          evt.preventDefault();
+          this.updateElement({ ...this.#originalPoint });
+          this.#handleCloseClick();
+        }
       });
     }
 
@@ -276,13 +291,13 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #dateFromChangeHandler = ([dateFrom]) => {
-    this.updateElement({
+    this._setState({
       dateFrom,
     });
   };
 
   #dateToChangeHandler = ([dateTo]) => {
-    this.updateElement({
+    this._setState({
       dateTo,
     });
   };

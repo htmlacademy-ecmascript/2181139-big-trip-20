@@ -8,6 +8,7 @@ import NoPointsView from '../view/no-points-view.js';
 import { UserAction } from '../utils/const.js';
 import LoadingView from '../view/loading-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import ErrorView from '../view/error-view.js';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
@@ -32,6 +33,8 @@ export default class BoardPresenter {
   #sortView = null;
   #noPointsView = null;
   #loadingView = new LoadingView();
+
+  #errorView = new ErrorView();
 
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -65,17 +68,7 @@ export default class BoardPresenter {
 
     switch (this.#sortType) {
       case SortType.DAY:
-        return filteredPoints.sort((a, b) => {
-          const d1 = new Date(Date.parse(a.dateFrom));
-          const d2 = new Date(Date.parse(b.dateFrom));
-          if (d1 > d2) {
-            return 1;
-          } else if (d1 < d2) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+        return filteredPoints.sort((a, b) => Date.parse(a.dateFrom) - Date.parse(b.dateFrom));
       case SortType.TIME:
         return filteredPoints.sort((a, b) => {
           const duration1 = Date.parse(a.dateTo) - Date.parse(a.dateFrom);
@@ -191,7 +184,11 @@ export default class BoardPresenter {
         break;
       case UpdateType.INIT:
         remove(this.#loadingView);
-        this.#renderBoard();
+        if (this.#pointsModel.points.length === 0) {
+          render(this.#errorView, this.#eventsContainer, RenderPosition.AFTERBEGIN);
+        } else {
+          this.#renderBoard();
+        }
         break;
     }
   };
