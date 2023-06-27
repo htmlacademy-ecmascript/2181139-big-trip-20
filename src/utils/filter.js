@@ -1,16 +1,16 @@
 import { FilterType } from './const.js';
 
 function isFuturePoint(dateFrom) {
-  return new Date() < new Date(Date.parse(dateFrom));
+  return Date.now() < Date.parse(dateFrom);
 }
 
 function isPresentPoint(dateFrom, dateTo) {
-  const currentDate = new Date();
-  return currentDate >= new Date(Date.parse(dateFrom)) && currentDate <= new Date(Date.parse(dateTo));
+  const currentDate = Date.now();
+  return currentDate >= Date.parse(dateFrom) && currentDate <= Date.parse(dateTo);
 }
 
 function isPastPoint(dateTo) {
-  return new Date() > new Date(Date.parse(dateTo));
+  return Date.now() > Date.parse(dateTo);
 }
 
 const filter = {

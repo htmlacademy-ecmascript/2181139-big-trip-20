@@ -1,4 +1,5 @@
 import ApiService from '../framework/api-service.js';
+import he from 'he';
 
 export default class PointApiService extends ApiService {
   get points() {
@@ -9,12 +10,29 @@ export default class PointApiService extends ApiService {
 
   get destinations() {
     return this._load({url: 'big-trip/destinations'})
-      .then(ApiService.parseResponse);
+      .then(ApiService.parseResponse).then((destinations) =>
+        destinations.map((d) =>
+          ({
+            id: he.encode(d.id),
+            name: he.encode(d.name),
+            description: he.encode(d.description),
+            pictures: d.pictures?.map((p) => ({
+              src: he.encode(p.src),
+              description: he.encode(p.description)
+            }))
+          })));
   }
 
   get offers() {
     return this._load({url: 'big-trip/offers'})
-      .then(ApiService.parseResponse);
+      .then(ApiService.parseResponse).then((offers) => offers?.map((o) => ({
+        type: he.encode(o.type),
+        offers: o.offers?.map((el) => ({
+          id: he.encode(el.id),
+          title: he.encode(el.title),
+          price: he.encode(el.price.toString())
+        }))
+      })));
   }
 
   updatePoint(point) {
@@ -36,8 +54,8 @@ export default class PointApiService extends ApiService {
       ...point,
       'date_from': point.dateFrom,
       'date_to': point.dateTo,
-      'base_price': point.basePrice,
-      'is_favorite': point.isFavorite,
+      'base_price': Number(point.basePrice),
+      'is_favorite': point.isFavorite === true,
     };
 
     delete adaptedPoint.dateFrom;
@@ -50,11 +68,14 @@ export default class PointApiService extends ApiService {
 
   transformPointForClient(point) {
     const adaptedPoint = {
-      ...point,
-      dateFrom: point.date_from,
-      dateTo: point.date_to,
-      basePrice: point.base_price,
-      isFavorite: point.is_favorite,
+      id: he.encode(point.id),
+      type: he.encode(point.type),
+      destination: he.encode(point.destination),
+      dateFrom: he.encode(point.date_from),
+      dateTo: he.encode(point.date_to),
+      basePrice: he.encode(point.base_price.toString()),
+      isFavorite: point.is_favorite === true,
+      offers: point.offers?.map((o) => he.encode(o))
     };
 
     delete adaptedPoint.date_from;

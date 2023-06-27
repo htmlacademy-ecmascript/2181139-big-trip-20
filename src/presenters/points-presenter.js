@@ -88,6 +88,8 @@ export default class PointsPresenter {
           isDeleting: false,
         });
       });
+    } else {
+      this.#pointView.shake(() => {});
     }
   }
 
