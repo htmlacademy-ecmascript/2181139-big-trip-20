@@ -47,16 +47,15 @@ export default class PointsPresenter {
 
   switchToPointView() {
     replace(this.#pointView, this.#editPointView);
-    document.removeEventListener('keyup', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
     this.#handleModeChange(this.#point.id, Mode.DEFAULT);
   }
 
   switchToEditPointView() {
     replace(this.#editPointView, this.#pointView);
-    document.addEventListener('keyup', this.#escKeyDownHandler);
     this.#mode = Mode.EDITING;
     this.#handleModeChange(this.#point.id, Mode.EDITING);
+    document.addEventListener('keyup', this.#handleCloseClick);
   }
 
   destroy() {
@@ -121,14 +120,13 @@ export default class PointsPresenter {
     this.switchToPointView();
   };
 
-  #handleCloseClick = () => {
-    this.switchToPointView();
-  };
-
-  #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
-      evt.preventDefault();
-      this.switchToPointView();
+  #handleCloseClick = (evt) => {
+    if (evt.type === 'keyup' && evt.key !== 'Escape') {
+      return;
     }
+    document.removeEventListener('keyup', this.#handleCloseClick);
+    evt.preventDefault();
+    this.#editPointView.updateElement({ ...this.#point });
+    this.switchToPointView();
   };
 }

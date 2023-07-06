@@ -158,12 +158,10 @@ export default class EditPointView extends AbstractStatefulView {
   #handleDeleteClick = null;
   #dateFromDatepicker = null;
   #dateToDatepicker = null;
-  #originalPoint = null;
 
   constructor({point, onFormSubmit, onDeleteClick, onCloseClick}) {
     super();
     if (point) {
-      this.#originalPoint = { ...point };
       this._state = { ...point };
     } else {
       this._state = {
@@ -270,17 +268,7 @@ export default class EditPointView extends AbstractStatefulView {
     });
 
     if (this._state.id) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-        this.updateElement({ ...this.#originalPoint });
-        this.#handleCloseClick();
-      });
-      this.element.addEventListener('keyup', (evt) => {
-        if(evt.key === 'Escape') {
-          evt.preventDefault();
-          this.updateElement({ ...this.#originalPoint });
-          this.#handleCloseClick();
-        }
-      });
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleCloseClick);
     }
 
     this.element.querySelector('.event__reset-btn').addEventListener('click', () => {
