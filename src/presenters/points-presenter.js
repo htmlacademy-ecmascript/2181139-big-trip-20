@@ -49,6 +49,7 @@ export default class PointsPresenter {
     replace(this.#pointView, this.#editPointView);
     this.#mode = Mode.DEFAULT;
     this.#handleModeChange(this.#point.id, Mode.DEFAULT);
+    document.removeEventListener('keyup', this.#handleCloseClick);
   }
 
   switchToEditPointView() {
@@ -124,7 +125,6 @@ export default class PointsPresenter {
     if (evt.type === 'keyup' && evt.key !== 'Escape') {
       return;
     }
-    document.removeEventListener('keyup', this.#handleCloseClick);
     evt.preventDefault();
     this.#editPointView.updateElement({ ...this.#point });
     this.switchToPointView();
